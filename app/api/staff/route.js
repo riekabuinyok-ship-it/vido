@@ -7,16 +7,20 @@ import bcrypt from "bcryptjs";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  await dbConnect();
-  const staff = await Staff.find({}).sort({ order: 1 }).lean();
-  const mapped = staff.map((m) => ({ ...m, id: m._id.toString() }));
-  return NextResponse.json(mapped);
+  try {
+    await dbConnect();
+    const staff = await Staff.find({}).sort({ order: 1 }).lean();
+    const mapped = staff.map((m) => ({ ...m, id: m._id.toString() }));
+    return NextResponse.json(mapped);
+  } catch (error) {
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(req) {
-  await dbConnect();
-  const body = await req.json();
   try {
+    await dbConnect();
+    const body = await req.json();
     const { password, email, name, role, bio } = body;
 
     if (email && password) {

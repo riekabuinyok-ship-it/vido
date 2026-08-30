@@ -7,17 +7,21 @@ import Partner from "@/models/Partner";
 export const dynamic = "force-dynamic";
 
 export async function GET(req, { params }) {
-  await dbConnect();
-  const partner = await Partner.findById(params.id).lean();
-  if (!partner) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+  try {
+    await dbConnect();
+    const partner = await Partner.findById(params.id).lean();
+    if (!partner) {
+      return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    }
+    return NextResponse.json({ ...partner, id: params.id });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
-  return NextResponse.json({ ...partner, id: params.id });
 }
 
 export async function PUT(req, { params }) {
-  await dbConnect();
   try {
+    await dbConnect();
     const formData = await req.formData();
     const name = formData.get("name");
     const type = formData.get("type");
@@ -62,10 +66,14 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
-  const partner = await Partner.findByIdAndDelete(params.id);
-  if (!partner) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+  try {
+    await dbConnect();
+    const partner = await Partner.findByIdAndDelete(params.id);
+    if (!partner) {
+      return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
-  return NextResponse.json({ success: true });
 }

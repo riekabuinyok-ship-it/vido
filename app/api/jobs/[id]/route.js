@@ -5,17 +5,21 @@ import Job from "@/models/Job";
 export const dynamic = "force-dynamic";
 
 export async function GET(req, { params }) {
-  await dbConnect();
-  const job = await Job.findById(params.id).lean();
-  if (!job) {
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
+  try {
+    await dbConnect();
+    const job = await Job.findById(params.id).lean();
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+    return NextResponse.json({ ...job, id: params.id });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
-  return NextResponse.json({ ...job, id: params.id });
 }
 
 export async function PUT(req, { params }) {
-  await dbConnect();
   try {
+    await dbConnect();
     const body = await req.json();
     const updates = {
       title: body.title,
@@ -39,10 +43,14 @@ export async function PUT(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
-  const job = await Job.findByIdAndDelete(params.id);
-  if (!job) {
-    return NextResponse.json({ error: "Job not found" }, { status: 404 });
+  try {
+    await dbConnect();
+    const job = await Job.findByIdAndDelete(params.id);
+    if (!job) {
+      return NextResponse.json({ error: "Job not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
-  return NextResponse.json({ success: true });
 }

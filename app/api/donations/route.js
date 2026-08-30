@@ -5,9 +5,9 @@ import Donation from "@/models/Donation";
 export const dynamic = "force-dynamic";
 
 export async function POST(req) {
-  await dbConnect();
-  const body = await req.json();
   try {
+    await dbConnect();
+    const body = await req.json();
     const { donorName, email, amount, method, reference } = body;
 
     if (!donorName || !email || !amount) {
@@ -34,16 +34,20 @@ export async function POST(req) {
 }
 
 export async function GET() {
-  await dbConnect();
-  const donations = await Donation.find({}).sort({ createdAt: -1 }).lean();
-  return NextResponse.json(donations);
+  try {
+    await dbConnect();
+    const donations = await Donation.find({}).sort({ createdAt: -1 }).lean();
+    return NextResponse.json(donations);
+  } catch (error) {
+    return NextResponse.json([]);
+  }
 }
 
 export async function DELETE(req) {
-  await dbConnect();
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get("id");
   try {
+    await dbConnect();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
     if (id) {
       const donation = await Donation.findByIdAndDelete(id);
       if (!donation) {

@@ -7,23 +7,33 @@ import Donation from "@/models/Donation";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  await dbConnect();
-  const [postCount, staffCount, totalViews, donationCount, recentPosts] =
-    await Promise.all([
-      Post.countDocuments(),
-      Staff.countDocuments(),
-      Post.aggregate([{ $group: { _id: null, total: { $sum: "$views" } } }]),
-      Donation.countDocuments(),
-      Post.find({}).sort({ createdAt: -1 }).limit(5).lean(),
-    ]);
+  try {
+    await dbConnect();
+    const [postCount, staffCount, totalViews, donationCount, recentPosts] =
+      await Promise.all([
+        Post.countDocuments(),
+        Staff.countDocuments(),
+        Post.aggregate([{ $group: { _id: null, total: { $sum: "$views" } } }]),
+        Donation.countDocuments(),
+        Post.find({}).sort({ createdAt: -1 }).limit(5).lean(),
+      ]);
 
-  return NextResponse.json({
-    stats: {
-      posts: postCount,
-      staff: staffCount,
-      views: totalViews[0]?.total || 0,
-      donations: donationCount,
-    },
-    recentPosts,
-  });
+    return NextResponse.json({
+      stats: {
+        posts: postCount,
+        staff: staffCount,
+        views: totalViews[0]?.total || 0,
+        donations: donationCount,
+      },
+      recentPosts,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        stats: { posts: 0, staff: 0, views: 0, donations: 0 },
+        recentPosts: [],
+      },
+      { status: 200 }
+    );
+  }
 }

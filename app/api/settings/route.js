@@ -5,19 +5,23 @@ import Settings from "@/models/Settings";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  await dbConnect();
-  const settings = await Settings.find({}).lean();
-  const flat = {};
-  settings.forEach((setting) => {
-    flat[setting.key] = setting.value;
-  });
-  return NextResponse.json(flat);
+  try {
+    await dbConnect();
+    const settings = await Settings.find({}).lean();
+    const flat = {};
+    settings.forEach((setting) => {
+      flat[setting.key] = setting.value;
+    });
+    return NextResponse.json(flat);
+  } catch (error) {
+    return NextResponse.json({});
+  }
 }
 
 export async function POST(req) {
-  await dbConnect();
-  const body = await req.json();
   try {
+    await dbConnect();
+    const body = await req.json();
     const updates = Object.entries(body).map(([key, value]) =>
       Settings.findOneAndUpdate({ key }, { key, value }, { upsert: true, new: true })
     );
