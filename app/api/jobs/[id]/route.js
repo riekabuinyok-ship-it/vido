@@ -26,6 +26,7 @@ export async function PUT(req, { params }) {
         type: body.type,
         email: body.email,
         description: body.description,
+        deadline: body.deadline ? new Date(body.deadline) : null,
       },
     });
     return NextResponse.json(job);

@@ -15,10 +15,20 @@ function defaultDate() {
 export async function GET() {
   try {
     const jobs = await prisma.job.findMany({ orderBy: { createdAt: "desc" } });
-    const mapped = jobs.map((job) => ({
-      ...job,
-      date: job.date || defaultDate(),
-    }));
+    const mapped = jobs.map((job) => {
+      const deadline = job.deadline
+        ? new Date(job.deadline)
+        : new Date(job.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const daysLeft = Math.ceil(
+        (deadline.getTime() - Date.now()) / (24 * 60 * 60 * 1000)
+      );
+      return {
+        ...job,
+        date: job.date || defaultDate(),
+        deadline: deadline.toISOString(),
+        daysLeft,
+      };
+    });
     return NextResponse.json(mapped);
   } catch (error) {
     return NextResponse.json(fallbackJobs);
@@ -28,7 +38,7 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { title, location, type, email, description } = body;
+    const { title, location, type, email, description, deadline } = body;
 
     if (!title || !title.trim() || !location || !description) {
       return NextResponse.json(
@@ -45,6 +55,7 @@ export async function POST(req) {
         email: email || "vido2024@gmail.com",
         description,
         date: defaultDate(),
+        deadline: deadline ? new Date(deadline) : null,
       },
     });
 

@@ -4621,6 +4621,26 @@
     gap: 6px;
 }
 
+.job-card .job-info .job-meta .job-deadline,
+.job-modal .modal-meta .job-deadline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1e9e4a;
+    font-weight: 600;
+}
+
+.job-card .job-info .job-meta .job-deadline.urgent,
+.job-modal .modal-meta .job-deadline.urgent {
+    color: #e74c3c;
+    animation: deadlinePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes deadlinePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+}
+
 .job-card .job-info .job-meta .job-type {
     display: inline-flex;
     align-items: center;

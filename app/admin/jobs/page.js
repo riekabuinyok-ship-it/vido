@@ -22,6 +22,14 @@ const emptyForm = {
   type: "full-time",
   email: "vido2024@gmail.com",
   description: "",
+  deadline: "",
+};
+
+const toDateInput = (value) => {
+  if (!value) return "";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
 };
 
 export default function JobsManagement() {
@@ -74,6 +82,7 @@ export default function JobsManagement() {
       type: job.type,
       email: job.email || "vido2024@gmail.com",
       description: job.description,
+      deadline: toDateInput(job.deadline),
     });
     setShowForm(true);
   };
@@ -204,6 +213,21 @@ export default function JobsManagement() {
                   placeholder="hr@vido.org"
                 />
               </div>
+              <div>
+                <label className="form-label">
+                  Deadline (dateline) <span className="required">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={form.deadline}
+                  onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+                  className="form-input"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Turns red when 3 days remain.
+                </p>
+              </div>
             </div>
             <div>
               <label className="form-label">
@@ -307,6 +331,7 @@ export default function JobsManagement() {
                       type: job.type,
                       email: job.email || "vido2024@gmail.com",
                       description: job.description,
+                      deadline: toDateInput(job.deadline),
                     });
                     setShowForm(true);
                     window.scrollTo({ top: 0, behavior: "smooth" });

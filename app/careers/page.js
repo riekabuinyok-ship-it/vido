@@ -47,6 +47,7 @@ const initialJobs = [
     location: "Juba, South Sudan",
     type: "full-time",
     date: "Mar 15, 2026",
+    deadline: "2026-10-15T00:00:00.000Z",
     email: "vido2024@gmail.com",
     description:
       "<p>We are looking for an experienced Program Manager to oversee our youth empowerment programs in South Sudan.</p><h4>Key Responsibilities:</h4><ul><li>Lead program planning and implementation</li><li>Manage program budgets and resources</li><li>Coordinate with stakeholders and partners</li><li>Monitor and evaluate program impact</li></ul><h4>Requirements:</h4><ul><li>5+ years of experience in program management</li><li>Experience working in South Sudan or similar context</li><li>Strong leadership and communication skills</li><li>Bachelor's degree in relevant field</li></ul>",
@@ -57,6 +58,7 @@ const initialJobs = [
     location: "Ruweng, South Sudan",
     type: "full-time",
     date: "Mar 12, 2026",
+    deadline: "2026-10-20T00:00:00.000Z",
     email: "vido2024@gmail.com",
     description:
       "<p>We are seeking a dedicated Field Officer to implement our community programs in Ruweng.</p><h4>Key Responsibilities:</h4><ul><li>Implement program activities in the field</li><li>Engage with community members and stakeholders</li><li>Monitor program progress and report</li><li>Coordinate with local partners</li></ul><h4>Requirements:</h4><ul><li>3+ years of field experience</li><li>Knowledge of South Sudan context</li><li>Strong community engagement skills</li><li>Bachelor's degree in relevant field</li></ul>",
@@ -67,6 +69,7 @@ const initialJobs = [
     location: "Juba, South Sudan",
     type: "part-time",
     date: "Mar 10, 2026",
+    deadline: "2026-10-10T00:00:00.000Z",
     email: "vido2024@gmail.com",
     description:
       "<p>We are looking for a Communications Officer to manage our media and communications activities.</p><h4>Key Responsibilities:</h4><ul><li>Manage social media platforms</li><li>Create content for website and newsletters</li><li>Design communication materials</li><li>Media engagement and press releases</li></ul><h4>Requirements:</h4><ul><li>2+ years of communications experience</li><li>Strong writing and editing skills</li><li>Experience with social media management</li><li>Bachelor's degree in Communications or related</li></ul>",
@@ -74,6 +77,25 @@ const initialJobs = [
 ];
 
 const typeLabel = (type) => type.charAt(0).toUpperCase() + type.slice(1);
+
+const formatDeadline = (value) => {
+  if (!value) return "Open";
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return "Open";
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+const isUrgent = (job) => {
+  if (typeof job.daysLeft === "number") return job.daysLeft <= 3;
+  if (!job.deadline) return false;
+  const d = new Date(job.deadline);
+  if (isNaN(d.getTime())) return false;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000) <= 3;
+};
 
 export default function CareersPage() {
   const [jobs, setJobs] = useState(initialJobs);
@@ -254,8 +276,8 @@ export default function CareersPage() {
                     <span className={`job-type ${job.type}`}>
                       <FaClock /> {typeLabel(job.type)}
                     </span>
-                    <span className="job-meta-item">
-                      <FaCalendarAlt /> Posted: {job.date}
+                    <span className={`job-deadline${isUrgent(job) ? " urgent" : ""}`}>
+                      <FaCalendarAlt /> Deadline: {formatDeadline(job.deadline || job.date)}
                     </span>
                     <span className="job-meta-item">
                       <FaEnvelope /> {job.email}
@@ -438,8 +460,9 @@ export default function CareersPage() {
               <span>
                 <FaClock /> {typeLabel(selectedJob.type)}
               </span>
-              <span>
-                <FaCalendarAlt /> {selectedJob.date}
+              <span className={`job-deadline${isUrgent(selectedJob) ? " urgent" : ""}`}>
+                <FaCalendarAlt /> Deadline:{" "}
+                {formatDeadline(selectedJob.deadline || selectedJob.date)}
               </span>
             </div>
             <div
