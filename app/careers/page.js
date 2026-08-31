@@ -473,7 +473,6 @@ export default function CareersPage() {
               <button
                 className="btn-apply"
                 onClick={closeModalAndApply}
-                style={{ padding: "12px 32px" }}
               >
                 <FaPaperPlane /> Apply Now
               </button>

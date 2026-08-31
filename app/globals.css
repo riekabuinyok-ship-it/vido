@@ -4672,8 +4672,8 @@
     flex-wrap: wrap;
 }
 
-.job-card .job-actions .btn-apply {
-    padding: 8px 20px;
+.btn-apply {
+    padding: 10px 24px;
     background: var(--secondary);
     color: var(--white);
     border-radius: var(--radius);
@@ -4683,12 +4683,21 @@
     transition: var(--transition);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
 }
 
-.job-card .job-actions .btn-apply:hover {
+.btn-apply:hover {
     background: var(--secondary-dark);
     transform: translateY(-2px);
+}
+
+.job-card .job-actions .btn-apply {
+    padding: 8px 20px;
+}
+
+.modal-actions .btn-apply {
+    flex: 1;
 }
 
 .job-card .job-actions .btn-details {
