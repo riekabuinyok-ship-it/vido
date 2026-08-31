@@ -259,9 +259,9 @@ export default function PartnersManagement() {
       {dbDown && (
         <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
           <strong>Database not connected.</strong> This is demo data — editing and
-          deleting are disabled. Add this server to{" "}
-          <strong>MongoDB Atlas → Network Access (allow 0.0.0.0/0)</strong> and
-          reload.
+          deleting are disabled. Set the{" "}
+          <strong>DATABASE_URL</strong> environment variable (Neon/Postgres) in
+          Vercel and redeploy.
         </div>
       )}
 
