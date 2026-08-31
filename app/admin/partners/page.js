@@ -18,6 +18,7 @@ export default function PartnersManagement() {
   const router = useRouter();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dbDown, setDbDown] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingPartner, setEditingPartner] = useState(null);
   const [formData, setFormData] = useState({
@@ -41,6 +42,11 @@ export default function PartnersManagement() {
       const res = await fetch("/api/partners");
       const data = await res.json();
       setPartners(data);
+      setDbDown(
+        Array.isArray(data) &&
+          data.length > 0 &&
+          data.every((p) => String(p.id).startsWith("fb-"))
+      );
     } catch (error) {
       toast.error("Failed to load partners");
     } finally {
@@ -250,6 +256,15 @@ export default function PartnersManagement() {
         </div>
       )}
 
+      {dbDown && (
+        <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+          <strong>Database not connected.</strong> This is demo data — editing and
+          deleting are disabled. Add this server to{" "}
+          <strong>MongoDB Atlas → Network Access (allow 0.0.0.0/0)</strong> and
+          reload.
+        </div>
+      )}
+
       <div className="admin-card">
         {loading && !showForm ? (
           <div className="text-center py-8 text-gray-500">Loading partners...</div>
@@ -262,7 +277,9 @@ export default function PartnersManagement() {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {partners.map((partner) => (
+            {partners.map((partner) => {
+              const isFallback = String(partner.id).startsWith("fb-");
+              return (
               <div
                 key={partner.id}
                 className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-secondary transition"
@@ -303,14 +320,16 @@ export default function PartnersManagement() {
                     )}
                     <button
                       onClick={() => editPartner(partner)}
-                      className="text-green-500 hover:text-green-700"
+                      disabled={isFallback}
+                      className="text-green-500 hover:text-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Edit"
                     >
                       <FaEdit />
                     </button>
                     <button
                       onClick={() => deletePartner(partner.id)}
-                      className="text-red-500 hover:text-red-700"
+                      disabled={isFallback}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Delete"
                     >
                       <FaTrash />
@@ -318,7 +337,8 @@ export default function PartnersManagement() {
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

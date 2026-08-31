@@ -27,6 +27,7 @@ const emptyForm = {
 export default function JobsManagement() {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dbDown, setDbDown] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -36,7 +37,12 @@ export default function JobsManagement() {
     try {
       const res = await fetch("/api/jobs");
       const data = await res.json();
-      if (Array.isArray(data)) setJobs(data);
+      if (Array.isArray(data)) {
+        setJobs(data);
+        setDbDown(
+          data.length > 0 && data.every((j) => String(j.id).startsWith("fb-"))
+        );
+      }
     } catch (error) {
       toast.error("Failed to load jobs");
     } finally {
@@ -231,6 +237,15 @@ export default function JobsManagement() {
         </div>
       )}
 
+      {dbDown && (
+        <div className="mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+          <strong>Database not connected.</strong> This is demo data — editing and
+          deleting are disabled. Add this server to{" "}
+          <strong>MongoDB Atlas → Network Access (allow 0.0.0.0/0)</strong> and
+          reload.
+        </div>
+      )}
+
       <div className="admin-card">
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading jobs...</div>
@@ -253,14 +268,16 @@ export default function JobsManagement() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => openEdit(job)}
-                      className="text-green-500 hover:text-green-700"
+                      disabled={String(job.id).startsWith("fb-")}
+                      className="text-green-500 hover:text-green-700 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Edit"
                     >
                       <FaEdit />
                     </button>
                     <button
                       onClick={() => deleteJob(job.id)}
-                      className="text-red-500 hover:text-red-700"
+                      disabled={String(job.id).startsWith("fb-")}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="Delete"
                     >
                       <FaTrash />
@@ -294,7 +311,8 @@ export default function JobsManagement() {
                     setShowForm(true);
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="mt-3 text-left text-sm text-primary hover:text-secondary transition"
+                  disabled={String(job.id).startsWith("fb-")}
+                  className="mt-3 text-left text-sm text-primary hover:text-secondary transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Edit details
                 </button>
