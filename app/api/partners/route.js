@@ -1,30 +1,10 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import dbConnect from "@/lib/db";
 import Partner from "@/models/Partner";
 import { fallbackPartners } from "@/lib/fallback-data";
+import { saveImage } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
-
-async function saveLogo(file) {
-  if (!file || !file.name) return null;
-
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
-  const ext = path.extname(file.name).toLowerCase() || ".png";
-  const safeName =
-    path
-      .basename(file.name, path.extname(file.name))
-      .replace(/[^a-zA-Z0-9-_]/g, "-") || "logo";
-  const filename = `${Date.now()}-${safeName}${ext}`;
-
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, filename), buffer);
-
-  return `/uploads/${filename}`;
-}
 
 export async function GET() {
   try {
@@ -54,7 +34,7 @@ export async function POST(req) {
       );
     }
 
-    const logo = await saveLogo(file);
+    const logo = await saveImage(file);
 
     const partner = await Partner.create({
       name: name.trim(),

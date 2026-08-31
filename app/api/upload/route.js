@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { saveImage } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
 
@@ -30,19 +29,7 @@ export async function POST(req) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const ext = path.extname(file.name).toLowerCase() || ".jpg";
-    const safeName =
-      path.basename(file.name, path.extname(file.name)).replace(/[^a-zA-Z0-9-_]/g, "-") || "img";
-    const filename = `${Date.now()}-${safeName}${ext}`;
-
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
-
-    const url = `/uploads/${filename}`;
+    const url = await saveImage(file);
     return NextResponse.json({ url }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

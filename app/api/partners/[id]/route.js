@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import dbConnect from "@/lib/db";
 import Partner from "@/models/Partner";
+import { saveImage } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
 
@@ -35,18 +34,7 @@ export async function PUT(req, { params }) {
     };
 
     if (file && file.name) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const ext = path.extname(file.name).toLowerCase() || ".png";
-      const safeName =
-        path
-          .basename(file.name, path.extname(file.name))
-          .replace(/[^a-zA-Z0-9-_]/g, "-") || "logo";
-      const filename = `${Date.now()}-${safeName}${ext}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
-      await mkdir(uploadDir, { recursive: true });
-      await writeFile(path.join(uploadDir, filename), buffer);
-      updates.logo = `/uploads/${filename}`;
+      updates.logo = await saveImage(file);
     }
 
     const partner = await Partner.findByIdAndUpdate(params.id, updates, {
