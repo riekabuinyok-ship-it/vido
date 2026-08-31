@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import dbConnect from "@/lib/db";
-import User from "@/models/User";
+import { prisma } from "@/lib/prisma";
 
 const NEXTAUTH_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 const useSecureCookies = NEXTAUTH_URL.startsWith("https://");
@@ -23,8 +22,7 @@ export const authOptions = {
         }
 
         try {
-          await dbConnect();
-          const user = await User.findOne({ email });
+          const user = await prisma.user.findUnique({ where: { email } });
 
           if (user) {
             const isValid = await bcrypt.compare(password, user.password);
@@ -32,7 +30,7 @@ export const authOptions = {
               throw new Error("Invalid password");
             }
             return {
-              id: user._id.toString(),
+              id: user.id,
               email: user.email,
               name: user.name,
               role: user.role,

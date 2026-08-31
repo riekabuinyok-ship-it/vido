@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Donation from "@/models/Donation";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
-    await dbConnect();
     const body = await req.json();
     const { donorName, email, amount, method, reference } = body;
 
@@ -17,14 +15,16 @@ export async function POST(req) {
       );
     }
 
-    const donation = await Donation.create({
-      donorName,
-      email,
-      amount: Number(amount),
-      currency: "USD",
-      method: method === "bank" ? "bank" : "stripe",
-      status: "pending",
-      reference: reference || null,
+    const donation = await prisma.donation.create({
+      data: {
+        donorName,
+        email,
+        amount: Number(amount),
+        currency: "USD",
+        method: method === "bank" ? "bank" : "stripe",
+        status: "pending",
+        reference: reference || null,
+      },
     });
 
     return NextResponse.json(donation, { status: 201 });
@@ -35,8 +35,9 @@ export async function POST(req) {
 
 export async function GET() {
   try {
-    await dbConnect();
-    const donations = await Donation.find({}).sort({ createdAt: -1 }).lean();
+    const donations = await prisma.donation.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     return NextResponse.json(donations);
   } catch (error) {
     return NextResponse.json([]);
@@ -45,18 +46,16 @@ export async function GET() {
 
 export async function DELETE(req) {
   try {
-    await dbConnect();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (id) {
-      const donation = await Donation.findByIdAndDelete(id);
-      if (!donation) {
-        return NextResponse.json({ error: "Donation not found" }, { status: 404 });
-      }
-      return NextResponse.json({ success: true });
+      const donation = await prisma.donation.delete({ where: { id } });
+      return NextResponse.json({ success: true, id: donation.id });
     }
-    await Donation.deleteMany({ email: "donor@example.com" });
-    return NextResponse.json({ success: true });
+    const result = await prisma.donation.deleteMany({
+      where: { email: "donor@example.com" },
+    });
+    return NextResponse.json({ success: true, count: result.count });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

@@ -1,5 +1,4 @@
-import dbConnect from "@/lib/db";
-import Donation from "@/models/Donation";
+import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -9,8 +8,9 @@ export const metadata = {
 };
 
 export default async function AdminDonationsPage() {
-  await dbConnect();
-  const donations = await Donation.find({}).sort({ createdAt: -1 }).lean();
+  const donations = await prisma.donation.findMany({
+    orderBy: { createdAt: "desc" },
+  });
   const total = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
 
   return (
@@ -48,7 +48,7 @@ export default async function AdminDonationsPage() {
             </tr>
           )}
           {donations.map((d) => (
-            <tr key={d._id.toString()}>
+                  <tr key={d.id}>
               <td>{d.donorName}</td>
               <td>{d.email}</td>
               <td>${d.amount}</td>

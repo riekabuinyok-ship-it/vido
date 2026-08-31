@@ -4,16 +4,22 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "seed": "node scripts/seed.mjs",
     "seed:posts": "node scripts/seed-posts.mjs",
     "seed:cleanup": "node scripts/cleanup-demo.mjs",
     "images:optimize": "node scripts/optimize-images.mjs",
-    "images:update": "node scripts/update-post-images.mjs"
+    "images:update": "node scripts/update-post-images.mjs",
+    "db:push": "prisma db push",
+    "db:migrate-data": "node scripts/migrate-mongo-to-pg.mjs"
+  },
+  "prisma": {
+    "seed": "node scripts/seed.mjs"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@vercel/blob": "^2.8.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
@@ -33,6 +39,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
+    "prisma": "^6.19.3",
     "tailwindcss": "^3.3.6"
   },
   "optionalDependencies": {

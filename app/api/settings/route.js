@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Settings from "@/models/Settings";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    await dbConnect();
-    const settings = await Settings.find({}).lean();
+    const settings = await prisma.setting.findMany();
     const flat = {};
     settings.forEach((setting) => {
       flat[setting.key] = setting.value;
@@ -20,12 +18,22 @@ export async function GET() {
 
 export async function POST(req) {
   try {
-    await dbConnect();
     const body = await req.json();
-    const updates = Object.entries(body).map(([key, value]) =>
-      Settings.findOneAndUpdate({ key }, { key, value }, { upsert: true, new: true })
+    const entries = Object.entries(body).map(([key, value]) => ({
+      key,
+      value: value === undefined ? null : value,
+    }));
+
+    await Promise.all(
+      entries.map((entry) =>
+        prisma.setting.upsert({
+          where: { key: entry.key },
+          create: entry,
+          update: { value: entry.value },
+        })
+      )
     );
-    await Promise.all(updates);
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });

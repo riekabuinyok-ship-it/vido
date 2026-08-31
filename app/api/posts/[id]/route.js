@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
-import "@/models/User";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req, { params }) {
   try {
-    await dbConnect();
-    const post = await Post.findById(params.id)
-      .populate("authorId", "name email")
-      .lean();
+    const post = await prisma.post.findUnique({
+      where: { id: params.id },
+      include: { author: { select: { id: true, name: true, email: true } } },
+    });
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -22,15 +20,11 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
-    await dbConnect();
     const body = await req.json();
-    const post = await Post.findByIdAndUpdate(params.id, body, {
-      new: true,
-      runValidators: true,
+    const post = await prisma.post.update({
+      where: { id: params.id },
+      data: body,
     });
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
     return NextResponse.json(post);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
@@ -39,12 +33,8 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    await dbConnect();
-    const post = await Post.findByIdAndDelete(params.id);
-    if (!post) {
-      return NextResponse.json({ error: "Post not found" }, { status: 404 });
-    }
-    return NextResponse.json({ success: true });
+    const post = await prisma.post.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true, id: post.id });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

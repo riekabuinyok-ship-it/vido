@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Partner from "@/models/Partner";
+import { prisma } from "@/lib/prisma";
 import { saveImage } from "@/lib/upload";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req, { params }) {
   try {
-    await dbConnect();
-    const partner = await Partner.findById(params.id).lean();
+    const partner = await prisma.partner.findUnique({
+      where: { id: params.id },
+    });
     if (!partner) {
       return NextResponse.json({ error: "Partner not found" }, { status: 404 });
     }
-    return NextResponse.json({ ...partner, id: params.id });
+    return NextResponse.json(partner);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -20,34 +20,27 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
-    await dbConnect();
     const formData = await req.formData();
     const name = formData.get("name");
     const type = formData.get("type");
     const website = formData.get("website");
     const file = formData.get("logo");
 
-    const updates = {
+    const data = {
       name: name?.trim() || undefined,
-      type: type || undefined,
-      website: website || undefined,
+      type: type || null,
+      website: website || null,
     };
 
     if (file && file.name) {
-      updates.logo = await saveImage(file);
+      data.logo = await saveImage(file);
     }
 
-    const partner = await Partner.findByIdAndUpdate(params.id, updates, {
-      new: true,
-      runValidators: true,
+    const partner = await prisma.partner.update({
+      where: { id: params.id },
+      data,
     });
-    if (!partner) {
-      return NextResponse.json({ error: "Partner not found" }, { status: 404 });
-    }
-    return NextResponse.json({
-      ...partner.toObject(),
-      id: partner._id.toString(),
-    });
+    return NextResponse.json(partner);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -55,12 +48,8 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    await dbConnect();
-    const partner = await Partner.findByIdAndDelete(params.id);
-    if (!partner) {
-      return NextResponse.json({ error: "Partner not found" }, { status: 404 });
-    }
-    return NextResponse.json({ success: true });
+    const partner = await prisma.partner.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true, id: partner.id });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

@@ -1,17 +1,12 @@
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import User from "../models/User.js";
-import Post from "../models/Post.js";
+import { PrismaClient } from "@prisma/client";
 import { blogImages } from "../lib/site-content.js";
 
 dotenv.config({ path: ".env.local" });
 
-const MONGODB_URI = process.env.MONGODB_URI;
+process.env.DATABASE_URL = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-if (!MONGODB_URI) {
-  console.error("MONGODB_URI is not set in .env.local");
-  process.exit(1);
-}
+const prisma = new PrismaClient();
 
 const demoPosts = [
   {
@@ -73,38 +68,35 @@ const demoPosts = [
 ];
 
 async function seed() {
-  await mongoose.connect(MONGODB_URI);
-  console.log("Connected to MongoDB");
-
-  const admin = await User.findOne({ role: "admin" });
+  const admin = await prisma.user.findFirst({ where: { role: "admin" } });
   if (!admin) {
     console.error(
       "No admin user found. Run `npm run seed` first to create the admin account."
     );
-    await mongoose.disconnect();
     process.exit(1);
   }
 
-  const existingCount = await Post.countDocuments({ status: "published" });
+  const existingCount = await prisma.post.count({ where: { status: "published" } });
   if (existingCount > 0) {
     console.log(`Database already has ${existingCount} published posts. Skipping.`);
-    await mongoose.disconnect();
     process.exit(0);
   }
 
-  const created = await Post.insertMany(
-    demoPosts.map((post) => ({
-      ...post,
-      authorId: admin._id,
-    }))
+  const created = await Promise.all(
+    demoPosts.map((post) =>
+      prisma.post.create({ data: { ...post, authorId: admin.id } })
+    )
   );
 
   console.log(`Created ${created.length} demo posts`);
-  await mongoose.disconnect();
   process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+seed()
+  .catch((err) => {
+    console.error("Seed failed:", err);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String
+  password  String
+  role      String    @default("editor")
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  posts     Post[]
+  updatedAt DateTime  @updatedAt
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  content       String
+  excerpt       String?
+  category      String?
+  tags          String[]
+  featuredImage String?
+  status        String    @default("draft")
+  views         Int       @default(0)
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Staff {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  email     String?
+  photo     String   @default("")
+  bio       String   @default("")
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id           String   @id @default(cuid())
+  name         String
+  type         String?
+  website      String?
+  logo         String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  title       String
+  location    String
+  type        String   @default("full-time")
+  email       String   @default("vido2024@gmail.com")
+  description String
+  date        String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Donation {
+  id        String   @id @default(cuid())
+  donorName String
+  email     String
+  amount    Float
+  currency  String   @default("USD")
+  method    String
+  status    String   @default("pending")
+  reference String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

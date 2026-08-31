@@ -7,7 +7,7 @@ import ImageUploader from "@/components/admin/ImageUploader";
 
 export default function PostEditor({ post }) {
   const router = useRouter();
-  const isEdit = Boolean(post?._id);
+  const isEdit = Boolean(post?.id);
   const {
     title = "",
     excerpt = "",
@@ -35,7 +35,7 @@ export default function PostEditor({ post }) {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = isEdit ? `/api/posts/${post._id}` : "/api/posts";
+      const url = isEdit ? `/api/posts/${post.id}` : "/api/posts";
       const method = isEdit ? "PUT" : "POST";
       const res = await fetch(url, {
         method,

@@ -1,17 +1,15 @@
 import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
-import Job from "@/models/Job";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req, { params }) {
   try {
-    await dbConnect();
-    const job = await Job.findById(params.id).lean();
+    const job = await prisma.job.findUnique({ where: { id: params.id } });
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
-    return NextResponse.json({ ...job, id: params.id });
+    return NextResponse.json(job);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -19,24 +17,18 @@ export async function GET(req, { params }) {
 
 export async function PUT(req, { params }) {
   try {
-    await dbConnect();
     const body = await req.json();
-    const updates = {
-      title: body.title,
-      location: body.location,
-      type: body.type,
-      email: body.email,
-      description: body.description,
-    };
-
-    const job = await Job.findByIdAndUpdate(params.id, updates, {
-      new: true,
-      runValidators: true,
+    const job = await prisma.job.update({
+      where: { id: params.id },
+      data: {
+        title: body.title,
+        location: body.location,
+        type: body.type,
+        email: body.email,
+        description: body.description,
+      },
     });
-    if (!job) {
-      return NextResponse.json({ error: "Job not found" }, { status: 404 });
-    }
-    return NextResponse.json({ ...job.toObject(), id: job._id.toString() });
+    return NextResponse.json(job);
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -44,12 +36,8 @@ export async function PUT(req, { params }) {
 
 export async function DELETE(req, { params }) {
   try {
-    await dbConnect();
-    const job = await Job.findByIdAndDelete(params.id);
-    if (!job) {
-      return NextResponse.json({ error: "Job not found" }, { status: 404 });
-    }
-    return NextResponse.json({ success: true });
+    const job = await prisma.job.delete({ where: { id: params.id } });
+    return NextResponse.json({ success: true, id: job.id });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }

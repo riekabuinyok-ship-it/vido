@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import dbConnect from "@/lib/db";
-import Staff from "@/models/Staff";
+import { prisma } from "@/lib/prisma";
 import { aboutImage } from "@/lib/site-content";
 import {
   FaMapMarkerAlt,
@@ -122,8 +121,7 @@ const fallbackTeam = [
 export default async function AboutPage() {
   let team = [];
   try {
-    await dbConnect();
-    const staff = await Staff.find({}).sort({ order: 1 }).lean();
+    const staff = await prisma.staff.findMany({ orderBy: { order: "asc" } });
     team = staff.map((s) => ({
       name: s.name,
       role: s.role,

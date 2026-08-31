@@ -1,9 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
-import Partner from "@/models/Partner";
+import { prisma } from "@/lib/prisma";
 import { fallbackPosts, fallbackPartners } from "@/lib/fallback-data";
 import { formatDate } from "@/lib/utils";
 import { heroImage } from "@/lib/site-content";
@@ -93,12 +91,14 @@ export default async function Home() {
   let latestPosts = [];
   let partners = [];
   try {
-    await dbConnect();
-    latestPosts = await Post.find({ status: "published" })
-      .sort({ publishedAt: -1 })
-      .limit(3)
-      .lean();
-    partners = await Partner.find({}).sort({ createdAt: -1 }).lean();
+    latestPosts = await prisma.post.findMany({
+      where: { status: "published" },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+    });
+    partners = await prisma.partner.findMany({
+      orderBy: { createdAt: "desc" },
+    });
   } catch (error) {
     // DB unavailable (e.g. dev/Atlas IP not whitelisted). Fall back to demo
     // content so the page still shows stories and partners.
@@ -260,7 +260,7 @@ export default async function Home() {
               </div>
             ) : (
               partners.map((partner) => (
-                <div key={partner._id.toString()} className="partner-item">
+                <div key={partner.id} className="partner-item">
                   <div className="partner-logo">
                     {partner.logo ? (
                       <img src={partner.logo} alt={partner.name} />
@@ -299,7 +299,7 @@ export default async function Home() {
               </p>
             ) : (
               latestPosts.map((post) => (
-                <article key={post._id.toString()} className="home-blog-card">
+                <article key={post.id} className="home-blog-card">
                   <Link href={`/blog/${post.slug}`} className="home-blog-link">
                     <div className="home-blog-thumb">
                       {post.featuredImage ? (

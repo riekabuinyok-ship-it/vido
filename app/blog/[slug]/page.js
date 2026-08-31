@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
-import "@/models/User";
+import { prisma } from "@/lib/prisma";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { formatDate } from "@/lib/utils";
@@ -28,29 +26,33 @@ function readingTime(html) {
 }
 
 export default async function BlogPostPage({ params }) {
-  await dbConnect();
-  const post = await Post.findOne({ slug: params.slug, status: "published" })
-    .populate("authorId", "name")
-    .lean();
+  const post = await prisma.post.findFirst({
+    where: { slug: params.slug, status: "published" },
+    include: { author: { select: { name: true } } },
+  });
   if (!post) notFound();
 
   const [related, allPosts] = await Promise.all([
-    Post.find({
-      _id: { $ne: post._id },
-      status: "published",
-      category: post.category,
-    })
-      .sort({ publishedAt: -1 })
-      .limit(3)
-      .lean(),
-    Post.find({ status: "published" })
-      .sort({ publishedAt: -1 })
-      .limit(4)
-      .lean(),
+    prisma.post.findMany({
+      where: {
+        status: "published",
+        category: post.category,
+        NOT: { id: post.id },
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+    }),
+    prisma.post.findMany({
+      where: { status: "published" },
+      orderBy: { publishedAt: "desc" },
+      take: 4,
+    }),
   ]);
 
   const relatedPosts =
-    related.length > 0 ? related : allPosts.filter((p) => p._id.toString() !== post._id.toString()).slice(0, 3);
+    related.length > 0
+      ? related
+      : allPosts.filter((p) => p.id !== post.id).slice(0, 3);
 
   const categories = {};
   allPosts.forEach((p) => {
@@ -59,7 +61,7 @@ export default async function BlogPostPage({ params }) {
   });
   const categoryEntries = Object.entries(categories).sort((a, b) => b[1] - a[1]);
 
-  const authorName = post.authorId?.name || "Admin";
+  const authorName = post.author?.name || "Admin";
   const title = post.title;
   const url = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/blog/${post.slug}`;
   const minutes = readingTime(post.content || "");
@@ -172,7 +174,7 @@ export default async function BlogPostPage({ params }) {
                   <h3>You Might Also Like</h3>
                   <div className="related-grid">
                     {relatedPosts.map((rp) => (
-                      <div key={rp._id.toString()} className="related-card">
+                      <div key={rp.id} className="related-card">
                         <div className="related-image">
                           {rp.featuredImage ? (
                             <img src={rp.featuredImage} alt={rp.title} />
@@ -232,8 +234,8 @@ export default async function BlogPostPage({ params }) {
               {/* Recent Posts */}
               <div className="sidebar-widget">
                 <h3>Recent Posts</h3>
-                {allPosts.filter((p) => p._id.toString() !== post._id.toString()).slice(0, 3).map((rp) => (
-                  <div key={rp._id.toString()} className="recent-post">
+                  {allPosts.filter((p) => p.id !== post.id).slice(0, 3).map((rp) => (
+                  <div key={rp.id} className="recent-post">
                     <div className="rp-thumb">
                       {rp.featuredImage ? (
                         <img src={rp.featuredImage} alt={rp.title} />

@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import dbConnect from "@/lib/db";
-import Post from "@/models/Post";
+import { prisma } from "@/lib/prisma";
 import PostEditor from "@/components/admin/PostEditor";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +9,7 @@ export const metadata = {
 };
 
 export default async function EditPostPage({ params }) {
-  await dbConnect();
-  const post = await Post.findById(params.id).lean();
+  const post = await prisma.post.findUnique({ where: { id: params.id } });
   if (!post) notFound();
 
   return (
@@ -19,7 +17,7 @@ export default async function EditPostPage({ params }) {
       <div className="admin-page-header">
         <h1>Edit Post</h1>
       </div>
-      <PostEditor post={{ ...post, _id: post._id.toString() }} />
+      <PostEditor post={post} />
     </div>
   );
 }

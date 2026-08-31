@@ -1,18 +1,13 @@
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import Post from "../models/Post.js";
+import { PrismaClient } from "@prisma/client";
 import { blogImages } from "../lib/site-content.js";
 
 dotenv.config({ path: ".env.local" });
 
-const MONGODB_URI = process.env.MONGODB_URI;
+process.env.DATABASE_URL = process.env.DIRECT_URL || process.env.DATABASE_URL;
 
-if (!MONGODB_URI) {
-  console.error("MONGODB_URI is not set in .env.local");
-  process.exit(1);
-}
+const prisma = new PrismaClient();
 
-// Map each category (or fallback by title keyword) to a local image.
 function imageFor(post) {
   const cat = (post.category || "").toLowerCase();
   const title = (post.title || "").toLowerCase();
@@ -29,28 +24,31 @@ function imageFor(post) {
 }
 
 async function main() {
-  await mongoose.connect(MONGODB_URI);
-  console.log("Connected to MongoDB");
-
-  const posts = await Post.find({ status: "published" }).lean();
+  const posts = await prisma.post.findMany({ where: { status: "published" } });
   console.log(`Found ${posts.length} published posts`);
 
   let updated = 0;
   for (const post of posts) {
     const want = imageFor(post);
     if (post.featuredImage !== want) {
-      await Post.updateOne({ _id: post._id }, { $set: { featuredImage: want } });
+      await prisma.post.update({
+        where: { id: post.id },
+        data: { featuredImage: want },
+      });
       updated++;
       console.log(`  Updated "${post.title}" -> ${want}`);
     }
   }
 
   console.log(`\nUpdated ${updated} posts`);
-  await mongoose.disconnect();
   process.exit(0);
 }
 
-main().catch((err) => {
-  console.error("Failed:", err);
-  process.exit(1);
-});
+main()
+  .catch((err) => {
+    console.error("Failed:", err);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
