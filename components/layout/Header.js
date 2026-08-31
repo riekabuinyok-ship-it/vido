@@ -39,7 +39,10 @@ export default function Header() {
             </div>
           </Link>
 
-          <ul className={`nav-menu${isOpen ? " active" : ""}`}>
+          <ul
+            className={`nav-menu${isOpen ? " active" : ""}`}
+            onClick={(e) => e.stopPropagation()}
+          >
             {navLinks.map((link) => (
               <li key={link.name}>
                 <Link
@@ -89,10 +92,19 @@ export default function Header() {
             className="menu-toggle"
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            type="button"
           >
             {isOpen ? "\u00d7" : "\u2630"}
           </button>
         </nav>
+
+        {isOpen && (
+          <div
+            className="nav-backdrop"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </header>
   );
