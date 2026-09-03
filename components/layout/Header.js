@@ -89,12 +89,15 @@ export default function Header() {
           </Link>
 
           <button
-            className="menu-toggle"
+            className={`menu-toggle${isOpen ? " active" : ""}`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
+            aria-expanded={isOpen}
             type="button"
           >
-            {isOpen ? "\u00d7" : "\u2630"}
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
+            <span className="hamburger-line" />
           </button>
         </nav>
 
