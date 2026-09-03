@@ -127,6 +127,7 @@ export default async function AboutPage() {
       role: s.role,
       bio: s.bio,
       photo: s.photo,
+      email: s.email,
     }));
   } catch {
     team = [];
@@ -250,28 +251,36 @@ export default async function AboutPage() {
               </p>
             </div>
             <div className="team-grid">
-              {teamMembers.map((member) => (
-                <div key={member.name} className="team-member">
-                  <div className="member-avatar">
-                    {member.photo ? (
-                      <img src={member.photo} alt={member.name} />
-                    ) : (
-                      <FaUserCircle />
-                    )}
+              {teamMembers.length === 0 ? (
+                <div className="no-team">Team members will be listed here soon.</div>
+              ) : (
+                teamMembers.map((member) => (
+                  <div key={member.name} className="team-card">
+                    <div className="team-card-image">
+                      {member.photo ? (
+                        <img src={member.photo} alt={member.name} />
+                      ) : (
+                        <div className="photo-placeholder">
+                          <FaUserCircle />
+                        </div>
+                      )}
+                    </div>
+                    <div className="team-card-body">
+                      <h3 className="member-name">{member.name}</h3>
+                      <p className="member-role">{member.role}</p>
+                      <div className="member-details">
+                        {member.email && (
+                          <div className="detail-item">
+                            <FaEnvelope />
+                            {member.email}
+                          </div>
+                        )}
+                      </div>
+                      {member.bio && <p className="member-bio">{member.bio}</p>}
+                    </div>
                   </div>
-                  <h4>{member.name}</h4>
-                  <p className="member-role">{member.role}</p>
-                  {member.bio && <p className="member-bio">{member.bio}</p>}
-                  <div className="member-social">
-                    <a href="#" aria-label="LinkedIn">
-                      <FaLinkedinIn />
-                    </a>
-                    <a href="#" aria-label="Twitter">
-                      <FaTwitter />
-                    </a>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
