@@ -2640,6 +2640,7 @@
 .social-connect .social-icons .youtube { background: #ff0000; }
 .social-connect .social-icons .linkedin { background: #0a66c2; }
 .social-connect .social-icons .whatsapp { background: #25d366; }
+.social-connect .social-icons .tiktok { background: #000000; }
 
 @media (max-width: 1024px) {
     .contact-info-grid {

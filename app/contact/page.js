@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -27,6 +27,7 @@ import {
   FaYoutube,
   FaLinkedinIn,
   FaWhatsapp,
+  FaMusic,
 } from "@/components/ui/Icons";
 
 const infoCards = [
@@ -70,13 +71,23 @@ const subjects = [
 ];
 
 const socialLinks = [
-  { icon: FaFacebookF, cls: "facebook", label: "Facebook" },
-  { icon: FaTwitter, cls: "twitter", label: "Twitter" },
-  { icon: FaInstagram, cls: "instagram", label: "Instagram" },
-  { icon: FaYoutube, cls: "youtube", label: "YouTube" },
-  { icon: FaLinkedinIn, cls: "linkedin", label: "LinkedIn" },
-  { icon: FaWhatsapp, cls: "whatsapp", label: "WhatsApp" },
+  { id: "facebook", icon: FaFacebookF, cls: "facebook", label: "Facebook", url: "#" },
+  { id: "twitter", icon: FaTwitter, cls: "twitter", label: "Twitter", url: "#" },
+  { id: "instagram", icon: FaInstagram, cls: "instagram", label: "Instagram", url: "#" },
+  { id: "youtube", icon: FaYoutube, cls: "youtube", label: "YouTube", url: "#" },
+  { id: "linkedin", icon: FaLinkedinIn, cls: "linkedin", label: "LinkedIn", url: "#" },
+  { id: "whatsapp", icon: FaWhatsapp, cls: "whatsapp", label: "WhatsApp", url: "#" },
 ];
+
+const platformMeta = {
+  facebook: { icon: FaFacebookF, cls: "facebook", label: "Facebook" },
+  twitter: { icon: FaTwitter, cls: "twitter", label: "Twitter" },
+  instagram: { icon: FaInstagram, cls: "instagram", label: "Instagram" },
+  youtube: { icon: FaYoutube, cls: "youtube", label: "YouTube" },
+  linkedin: { icon: FaLinkedinIn, cls: "linkedin", label: "LinkedIn" },
+  whatsapp: { icon: FaWhatsapp, cls: "whatsapp", label: "WhatsApp" },
+  tiktok: { icon: FaMusic, cls: "tiktok", label: "TikTok" },
+};
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -88,6 +99,22 @@ export default function ContactPage() {
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [configured, setConfigured] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/social")
+      .then((res) => res.json())
+      .then((data) => data && data.links && setConfigured(data.links))
+      .catch(() => {});
+  }, []);
+
+  const activeSocials = configured
+    ? Object.entries(configured)
+        .filter(([, v]) => v && v.active && v.url)
+        .map(([id, v]) => ({ id, url: v.url, ...(platformMeta[id] || {}) }))
+        .filter((s) => s.icon && s.cls)
+    : [];
+  const socials = activeSocials.length ? activeSocials : socialLinks;
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -385,8 +412,15 @@ export default function ContactPage() {
             <h2>Connect With Us</h2>
             <p>Follow us on social media for the latest updates and news</p>
             <div className="social-icons">
-              {socialLinks.map((s) => (
-                <a key={s.label} href="#" className={s.cls} aria-label={s.label}>
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.url}
+                  className={s.cls}
+                  aria-label={s.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <s.icon />
                 </a>
               ))}
