@@ -14,6 +14,7 @@ import {
   FaDonate,
   FaHandshake,
   FaBriefcase,
+  FaShareAlt,
 } from "react-icons/fa";
 
 const menuItems = [
@@ -24,6 +25,7 @@ const menuItems = [
   { name: "Donations", href: "/admin/donations", icon: FaDonate },
   { name: "Jobs", href: "/admin/jobs", icon: FaBriefcase },
   { name: "Partners", href: "/admin/partners", icon: FaHandshake },
+  { name: "Social Links", href: "/admin/social", icon: FaShareAlt },
   { name: "Settings", href: "/admin/settings", icon: FaCog },
 ];
 

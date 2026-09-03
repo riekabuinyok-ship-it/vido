@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { site, logoFooter } from "@/lib/site-content";
 import {
@@ -5,13 +8,56 @@ import {
   FaTwitter,
   FaInstagram,
   FaYoutube,
+  FaLinkedinIn,
+  FaWhatsapp,
+  FaMusic,
   FaPaperPlane,
   FaMapMarkerAlt,
   FaPhoneAlt,
   FaEnvelope,
 } from "@/components/ui/Icons";
 
+const platformIcons = {
+  linkedin: { Icon: FaLinkedinIn, label: "LinkedIn" },
+  whatsapp: { Icon: FaWhatsapp, label: "WhatsApp" },
+  facebook: { Icon: FaFacebookF, label: "Facebook" },
+  twitter: { Icon: FaTwitter, label: "X (Twitter)" },
+  youtube: { Icon: FaYoutube, label: "YouTube" },
+  tiktok: { Icon: FaMusic, label: "TikTok" },
+  instagram: { Icon: FaInstagram, label: "Instagram" },
+};
+
+const fallbackSocials = [
+  { id: "facebook", url: "#", Icon: FaFacebookF, label: "Facebook" },
+  { id: "twitter", url: "#", Icon: FaTwitter, label: "Twitter" },
+  { id: "instagram", url: "#", Icon: FaInstagram, label: "Instagram" },
+  { id: "youtube", url: "#", Icon: FaYoutube, label: "YouTube" },
+];
+
 export default function Footer() {
+  const [socialLinks, setSocialLinks] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/social")
+      .then((res) => res.json())
+      .then((data) => data?.links && setSocialLinks(data.links))
+      .catch(() => {});
+  }, []);
+
+  const activeSocials = socialLinks
+    ? Object.entries(socialLinks)
+        .filter(([, v]) => v && v.active && v.url)
+        .map(([id, v]) => ({
+          id,
+          url: v.url,
+          Icon: platformIcons[id]?.Icon,
+          label: platformIcons[id]?.label || id,
+        }))
+        .filter((s) => s.Icon)
+    : [];
+
+  const socials = activeSocials.length ? activeSocials : fallbackSocials;
+
   return (
     <footer className="footer">
       <div className="container">
@@ -82,23 +128,19 @@ export default function Footer() {
             <div className="footer-social">
               <h3>Follow Us</h3>
               <div className="social-links">
-                <a href="#" aria-label="Facebook">
-                  <FaFacebookF />
-                </a>
-                <a href="#" aria-label="Twitter">
-                  <FaTwitter />
-                </a>
-                <a href="#" aria-label="Instagram">
-                  <FaInstagram />
-                </a>
-                <a href="#" aria-label="YouTube">
-                  <FaYoutube />
-                </a>
+                {socials.map((s) => (
+                  <a
+                    key={s.id}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                  >
+                    <s.Icon />
+                  </a>
+                ))}
               </div>
-              <a
-                href="tel:0924440899"
-                className="footer-credit"
-              >
+              <a href="tel:0924440899" className="footer-credit">
                 Developed By <strong>Juba Tech</strong>
               </a>
             </div>

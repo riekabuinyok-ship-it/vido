@@ -561,3 +561,10 @@ export const FaEye = (p) => (
     <Circle cx="12" cy="12" r="3" />
   </Svg>
 );
+export const FaMusic = (p) => (
+  <Svg {...p}>
+    <Path d="M9 18V5l12-2v13" />
+    <Circle cx="6" cy="18" r="3" />
+    <Circle cx="18" cy="16" r="3" />
+  </Svg>
+);
