@@ -10,7 +10,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("wuorial120@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -73,7 +73,7 @@ export default function AdminLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="form-input"
-              placeholder="wuorial120@gmail.com"
+              placeholder="Enter your email"
               required
             />
           </div>
