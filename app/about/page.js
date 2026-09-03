@@ -243,10 +243,12 @@ export default async function AboutPage() {
 
           {/* ===== OUR TEAM ===== */}
           <div className="team-section">
-            <h2>Our Team</h2>
-            <p className="section-sub">
-              Meet the dedicated individuals driving our mission forward
-            </p>
+            <div className="section-header">
+              <h2 className="section-title">Our Team</h2>
+              <p className="section-subtitle">
+                Meet the dedicated individuals driving our mission forward
+              </p>
+            </div>
             <div className="team-grid">
               {teamMembers.map((member) => (
                 <div key={member.name} className="team-member">
