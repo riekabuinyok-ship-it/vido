@@ -15,6 +15,9 @@ import {
   FaBuilding,
   FaHandshake,
   FaEnvelope,
+  FaBriefcase,
+  FaGraduationCap,
+  FaClock,
   FaHeart,
   FaEye,
   FaStar,
@@ -128,6 +131,9 @@ export default async function AboutPage() {
       bio: s.bio,
       photo: s.photo,
       email: s.email,
+      capacity: s.capacity,
+      education: s.education,
+      experience: s.experience,
     }));
   } catch {
     team = [];
@@ -269,6 +275,24 @@ export default async function AboutPage() {
                       <h3 className="member-name">{member.name}</h3>
                       <p className="member-role">{member.role}</p>
                       <div className="member-details">
+                        {member.capacity && (
+                          <div className="detail-item">
+                            <FaBriefcase />
+                            {member.capacity}
+                          </div>
+                        )}
+                        {member.education && (
+                          <div className="detail-item">
+                            <FaGraduationCap />
+                            {member.education}
+                          </div>
+                        )}
+                        {member.experience && (
+                          <div className="detail-item">
+                            <FaClock />
+                            {member.experience} years experience
+                          </div>
+                        )}
                         {member.email && (
                           <div className="detail-item">
                             <FaEnvelope />

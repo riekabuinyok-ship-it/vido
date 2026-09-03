@@ -95,6 +95,13 @@ export const FaBriefcase = (p) => (
     <Path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
   </Svg>
 );
+export const FaGraduationCap = (p) => (
+  <Svg {...p}>
+    <Path d="M21.42 10.92a1 1 0 0 0 0-1.84l-8.17-3.91a2 2 0 0 0-1.5 0L3.58 9.08a1 1 0 0 0 0 1.84l8.17 3.91a2 2 0 0 0 1.5 0z" />
+    <Path d="M22 10v6" />
+    <Path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" />
+  </Svg>
+);
 export const FaBuilding = (p) => (
   <Svg {...p}>
     <Rect x="4" y="2" w="16" h="20" rx="2" />

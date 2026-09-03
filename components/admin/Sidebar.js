@@ -20,7 +20,7 @@ const menuItems = [
   { name: "Dashboard", href: "/admin", icon: FaHome },
   { name: "All Posts", href: "/admin/posts", icon: FaNewspaper },
   { name: "New Post", href: "/admin/posts/new", icon: FaPlus },
-  { name: "Staff", href: "/admin/staff", icon: FaUsers },
+  { name: "Team", href: "/admin/team", icon: FaUsers },
   { name: "Donations", href: "/admin/donations", icon: FaDonate },
   { name: "Jobs", href: "/admin/jobs", icon: FaBriefcase },
   { name: "Partners", href: "/admin/partners", icon: FaHandshake },
